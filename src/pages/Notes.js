@@ -1,33 +1,31 @@
-import {  Typography } from '@material-ui/core';
-import React from 'react';
-import Create from './Create';
-import Home from './Home';
-import { makeStyles } from '@material-ui/core';
-const styles = makeStyles({
-  mar: {
-    marginBottom: '30px',
-    textAlign: 'center'
-  },
-  lr: {
-    marginLeft: '25px',
-    marginRight: '25px'
-  },
+import React, { useEffect, useState } from 'react'
+import {Grid,  Container} from '@material-ui/core'
+import NoteCard from '../Components/NoteCard';
+export default function Notes() {
+  const [notes, setNotes] = useState([]);
 
-})
-const Notes = () => {
-  const colors = styles()
-
+  useEffect(() => {
+    fetch('http://localhost:8000/notes')
+      .then(res => res.json())
+      .then(data => setNotes(data))
+  }, [])
+  const handle = async(id)=>{
+    await fetch('http://localhost:8000/notes/' + id, {
+      method: 'DELETE'
+    })
+    const newarray = notes.filter(note=> note.id !== id)
+    setNotes(newarray)
+  }
   return (
-    <div>
-      
-        <Typography variant='h3'className={colors.mar}>
-          Create a New Note
-        </Typography>
-        <Create colors ={colors}  />
-        <Home  />
-      
-    </div>
-  );
+    <Container>
+        <Grid container spacing={3}>
+        {notes && notes.map(note => (
+          <Grid item key={note.id} xs={12} md={6} lg={4}>
+            <NoteCard note={note} handle={handle} />
+          </Grid>
+        ))}
+      </Grid>
+   </Container>
+  )
 }
 
-export default Notes;
